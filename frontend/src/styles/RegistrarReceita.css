@@ -1,0 +1,361 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background-color: #eef3f8;
+}
+
+.pagina-receita {
+  width: 100%;
+  min-height: 100vh;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: minmax(480px, 3fr) minmax(320px, 2fr);
+  gap: 28px;
+  align-items: stretch;
+}
+
+.cartao-formulario {
+  min-width: 0;
+  padding: 28px 31px;
+  background-color: #ffffff;
+  border: 1px solid #dce3eb;
+  border-radius: 20px;
+}
+
+.cartao-formulario header {
+  margin-bottom: 20px;
+}
+
+.subtitulo {
+  color: #d88d17;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+}
+
+.cartao-formulario h1 {
+  margin: 12px 0 0;
+  color: #07162e;
+  font-size: 26px;
+  line-height: 1.2;
+}
+
+.cartao-formulario header p {
+  max-width: 480px;
+  margin: 8px 0 0;
+  color: #8490a3;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.cartao-formulario form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.campo {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  border: 0;
+}
+
+.campo label,
+.campo legend {
+  color: #071224;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.campo label span {
+  color: #8b96a8;
+  font-weight: 400;
+}
+
+.campo input,
+.campo textarea {
+  width: 100%;
+  padding: 12px 14px;
+  color: #071224;
+  background-color: #ffffff;
+  border: 1px solid #d8e0ea;
+  border-radius: 11px;
+  outline: none;
+  font: inherit;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.campo input:focus,
+.campo textarea:focus,
+.entrada-valor:focus-within {
+  border-color: #70849e;
+  box-shadow: 0 0 0 3px rgb(112 132 158 / 12%);
+}
+
+.entrada-valor {
+  height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 13px;
+  background-color: #ffffff;
+  border: 1px solid #d8e0ea;
+  border-radius: 11px;
+}
+
+.entrada-valor span {
+  color: #071224;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.entrada-valor input {
+  height: 100%;
+  padding: 0;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 23px;
+  font-weight: 700;
+  border: 0;
+  box-shadow: none;
+}
+
+.entrada-valor input:focus {
+  box-shadow: none;
+}
+
+.entrada-valor input::-webkit-inner-spin-button,
+.entrada-valor input::-webkit-outer-spin-button {
+  appearance: none;
+}
+
+.lista-categorias {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px 10px;
+}
+
+.lista-categorias button {
+  min-height: 41px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  color: #10192a;
+  background-color: #ffffff;
+  border: 1px solid #d8e0ea;
+  border-radius: 10px;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
+}
+
+.lista-categorias button::before {
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+  background-color: #8d99a9;
+  border-radius: 50%;
+  content: '';
+}
+
+.lista-categorias button:nth-child(1)::before {
+  background-color: #86a692;
+}
+
+.lista-categorias button:nth-child(2)::before {
+  background-color: #7e9bbc;
+}
+
+.lista-categorias button:nth-child(3)::before {
+  background-color: #a58cac;
+}
+
+.lista-categorias button:nth-child(4)::before {
+  background-color: #8d99a9;
+}
+
+.lista-categorias button:hover {
+  border-color: #8292a7;
+}
+
+.lista-categorias button[aria-pressed='true'] {
+  background-color: #f4f6f8;
+  border-color: #7c8da3;
+}
+
+.campo-data {
+  width: calc(50% - 5px);
+}
+
+.campo-data input {
+  min-height: 44px;
+}
+
+.campo textarea {
+  min-height: 65px;
+  max-height: 90px;
+  resize: vertical;
+}
+
+.mensagem {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.mensagem-erro {
+  color: #991b1b;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.mensagem-sucesso {
+  color: #166534;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.botao-registrar {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 2px;
+  padding: 13px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  background-color: #111c2f;
+  border: 0;
+  border-radius: 11px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    transform 0.1s;
+}
+
+.botao-registrar:hover {
+  background-color: #1a2a43;
+}
+
+.botao-registrar:active {
+  transform: translateY(1px);
+}
+
+.botao-registrar:disabled,
+.lista-categorias button:disabled,
+.campo input:disabled,
+.campo textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.cartao-saldo {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 40px 26px;
+  color: #ffffff;
+  background-color: #111b2e;
+  border-radius: 18px;
+}
+
+.titulo-saldo {
+  color: #9ba8bb;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.3px;
+}
+
+.orbita-saldo {
+  width: 172px;
+  height: 172px;
+  margin: 40px auto 0;
+  display: grid;
+  place-items: center;
+  border: 15px solid #88a590;
+  border-radius: 50%;
+}
+
+.conteudo-saldo {
+  text-align: center;
+}
+
+.conteudo-saldo span {
+  display: block;
+  color: #a8b1c0;
+  font-size: 11px;
+  letter-spacing: 0.8px;
+}
+
+.conteudo-saldo strong {
+  display: block;
+  margin-top: 8px;
+  color: #ffffff;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 23px;
+  white-space: nowrap;
+}
+
+@media (max-width: 880px) {
+  .pagina-receita {
+    min-height: auto;
+    padding: 14px;
+    grid-template-columns: 1fr;
+  }
+
+  .cartao-formulario,
+  .cartao-saldo {
+    width: 100%;
+  }
+
+  .cartao-saldo {
+    min-height: 330px;
+  }
+}
+
+@media (max-width: 560px) {
+  .pagina-receita {
+    padding: 10px;
+  }
+
+  .cartao-formulario {
+    padding: 24px 20px;
+  }
+
+  .lista-categorias {
+    grid-template-columns: 1fr;
+  }
+
+  .campo-data {
+    width: 100%;
+  }
+
+  .orbita-saldo {
+    width: 150px;
+    height: 150px;
+    border-width: 13px;
+  }
+}
