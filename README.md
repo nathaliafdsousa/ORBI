@@ -30,5 +30,10 @@ Frontend:
 
 
 ## Equipe
-  Nathalia Ferreira De Sousa
-  Pedro Felipe dos Santos
+ - Nathalia Ferreira De Sousa
+ 
+ - Pedro Felipe dos Santos
+
+
+## Status do Projeto
+  -Em andamento
