@@ -26,9 +26,9 @@ Frontend:
 
 ## Arquitetura
 
-Usuário (Browser) --HTTPS--> Frontend (React + TypeScript)
-                                    |
-                              HTTP / REST API
-                                    |
-                     Backend (Python / FastAPI) --SQL--> PostgreSQL
+![Arquitetura do sistema](images/orbi_arquitetura_isometrica.png)
 
+
+## Equipe
+  Nathalia Ferreira De Sousa
+  Pedro Felipe dos Santos
