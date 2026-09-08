@@ -1,8 +1,8 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { CATEGORIAS } from '../constants/categorias'
-import { registrarReceita } from '../services/receitaService'
-import type { ReceitaCreate } from '../types/receita'
-import '../styles/registrarReceita.css'
+import { consultarResumoMensal, registrarReceita } from '../services/receitaService'
+import type { ReceitaCreate, ResumoMensal } from '../types/receita'
+import '../styles/RegistrarReceita.css'
 
 type CategoriaSelecionada = number | 'outra' | null
 
@@ -13,6 +13,25 @@ function formatarMoeda(valor: number): string {
   }).format(valor)
 }
 
+const CORES = ['#86a692', '#7e9bbc', '#a58cac', '#d2ac72', '#79b9b3', '#cb8c99']
+
+function corCategoria(id: number): string {
+  return CORES[((id - 1) % CORES.length + CORES.length) % CORES.length]!
+}
+
+function fundoOrbita(resumo: ResumoMensal | null): string {
+  if (!resumo || resumo.total_mes <= 0) return '#344155'
+
+  let acumulado = 0
+  const partes = resumo.categorias.map((item) => {
+    const inicio = acumulado
+    acumulado += (item.total / resumo.total_mes) * 100
+    return `${corCategoria(item.id_categoria)} ${inicio}% ${acumulado}%`
+  })
+
+  return partes.length ? `conic-gradient(${partes.join(', ')})` : '#344155'
+}
+
 function RegistrarReceita() {
   const [valor, setValor] = useState('')
   const [categoria, setCategoria] =
@@ -21,8 +40,39 @@ function RegistrarReceita() {
   const [data, setData] = useState('')
   const [descricao, setDescricao] = useState('')
 
-  const [saldoAtual, setSaldoAtual] =
-    useState<number | null>(null)
+  const [resumo, setResumo] = useState<ResumoMensal | null>(null)
+  const [carregandoResumo, setCarregandoResumo] = useState(true)
+  const [erroResumo, setErroResumo] = useState('')
+  const [versaoResumo, setVersaoResumo] = useState(0)
+  const requisicaoResumo = useRef<AbortController | null>(null)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    requisicaoResumo.current = controller
+
+    consultarResumoMensal(controller.signal)
+      .then((resultado) => {
+        if (!controller.signal.aborted) setResumo(resultado)
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setErroResumo('Não foi possível atualizar o resumo mensal.')
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setCarregandoResumo(false)
+      })
+
+    return () => controller.abort()
+  }, [versaoResumo])
+
+  function atualizarResumo() {
+    requisicaoResumo.current?.abort()
+    setResumo(null)
+    setErroResumo('')
+    setCarregandoResumo(true)
+    setVersaoResumo((anterior) => anterior + 1)
+  }
   const [enviando, setEnviando] = useState(false)
   const [mensagem, setMensagem] = useState('')
   const [erro, setErro] = useState('')
@@ -50,7 +100,7 @@ function RegistrarReceita() {
 
     const valorNumerico = Number(valor)
 
-    if (!valorNumerico || valorNumerico <= 0) {
+    if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
       setErro('Informe um valor maior que zero.')
       return
     }
@@ -70,9 +120,9 @@ function RegistrarReceita() {
     try {
       setEnviando(true)
 
-      const resposta = await registrarReceita(receita)
+      await registrarReceita(receita)
 
-      setSaldoAtual(resposta.saldo_atual)
+      atualizarResumo()
       setMensagem('Receita registrada com sucesso!')
 
       setValor('')
@@ -237,22 +287,57 @@ function RegistrarReceita() {
         </form>
       </section>
 
-      <aside className="cartao-saldo">
-        <span className="titulo-saldo">
-          SUA ÓRBITA
-        </span>
+      <aside className="cartao-saldo" aria-label="Resumo mensal de receitas">
+        <span className="titulo-saldo">SUA ÓRBITA ESTE MÊS</span>
 
-        <div className="orbita-saldo">
+        {resumo && (
+          <p className="periodo-orbita">
+            {new Intl.DateTimeFormat('pt-BR', {
+              month: 'long',
+              year: 'numeric',
+            }).format(new Date(resumo.ano, resumo.mes - 1, 1))}
+          </p>
+        )}
+
+        <div className="orbita-saldo" style={{ background: fundoOrbita(resumo) }}>
           <div className="conteudo-saldo">
-            <span>SALDO ATUAL</span>
-
-            <strong>
-              {saldoAtual === null
-                ? '—'
-                : formatarMoeda(saldoAtual)}
-            </strong>
+            <span>RECEITAS NO MÊS</span>
+            <strong>{resumo ? formatarMoeda(resumo.total_mes) : '—'}</strong>
           </div>
         </div>
+
+        <div className="estado-orbita" aria-live="polite">
+          {carregandoResumo && <p>Carregando resumo…</p>}
+          {erroResumo && (
+            <div className="erro-orbita">
+              <p>{erroResumo}</p>
+              <button type="button" onClick={atualizarResumo}>
+                Tentar novamente
+              </button>
+            </div>
+          )}
+          {resumo && resumo.categorias.length === 0 && (
+            <p>Nenhuma receita registrada neste mês.</p>
+          )}
+        </div>
+
+        {resumo && resumo.categorias.length > 0 && (
+          <ul className="categorias-orbita" aria-label="Totais por categoria">
+            {resumo.categorias.map((item) => (
+              <li key={item.id_categoria}>
+                <span className="nome-categoria-orbita">
+                  <span
+                    className="cor-categoria-orbita"
+                    style={{ backgroundColor: corCategoria(item.id_categoria) }}
+                    aria-hidden="true"
+                  />
+                  {item.nome}
+                </span>
+                <strong>{formatarMoeda(item.total)}</strong>
+              </li>
+            ))}
+          </ul>
+        )}
       </aside>
     </main>
   )

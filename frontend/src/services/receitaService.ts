@@ -1,6 +1,7 @@
 import type {
   ReceitaCreate,
   ReceitaResponse,
+  ResumoMensal,
 } from '../types/receita'
 
 interface ErroValidacao {
@@ -47,4 +48,21 @@ export async function registrarReceita(
   }
 
   return resposta.json() as Promise<ReceitaResponse>
+}
+
+export async function consultarResumoMensal(
+  signal?: AbortSignal,
+): Promise<ResumoMensal> {
+  const resposta = await fetch(
+    `${API_URL}/receitas/resumo-mensal`,
+    { signal },
+  )
+
+  if (!resposta.ok) {
+    throw new Error(
+      'Não foi possível consultar o resumo mensal.',
+    )
+  }
+
+  return resposta.json() as Promise<ResumoMensal>
 }

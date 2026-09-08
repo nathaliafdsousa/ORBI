@@ -20,3 +20,16 @@ export interface CategoriaOpcao {
   id_categoria: number
   nome: string
 }
+
+export interface ResumoCategoria {
+  id_categoria: number
+  nome: string
+  total: number
+}
+
+export interface ResumoMensal {
+  ano: number
+  mes: number
+  total_mes: number
+  categorias: ResumoCategoria[]
+}
