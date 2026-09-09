@@ -1,0 +1,61 @@
+.orbi-aplicacao { min-height: 100vh; width: 100%; background: #eef3f8; }
+.orbi-navegacao { min-height: 72px; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; background: #fff; border-bottom: 1px solid #dce3eb; }
+.orbi-marca { font-weight: 800; letter-spacing: 3px; color: #111b2e; }
+.orbi-links { display: flex; gap: 10px; flex-wrap: wrap; }
+.orbi-links a { padding: 10px 16px; border: 1px solid #d8e0ea; border-radius: 10px; color: #111b2e; text-decoration: none; font-size: 14px; font-weight: 600; }
+.orbi-links a[aria-current='page'] { background: #111b2e; color: white; border-color: #111b2e; }
+.orbi-aplicacao .pagina-receita { min-height: calc(100vh - 72px); }
+.historico-pagina { width: 100%; padding: 20px; min-height: calc(100vh - 72px); }
+.historico-cartao { width: 100%; min-height: calc(100vh - 112px); padding: 30px; background: white; border: 1px solid #dce3eb; border-radius: 20px; color: #07162e; }
+.historico-cabecalho { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+.historico-sobretitulo { color: #a56b10; letter-spacing: 1.4px; font-size: 11px; font-weight: 700; }
+.historico-cabecalho h1 { margin: 10px 0 8px; font-size: clamp(23px, 2.4vw, 30px); }
+.historico-cabecalho p { color: #637086; font-size: 14px; line-height: 1.6; }
+.historico-total { text-align: right; flex-shrink: 0; display: flex; flex-direction: column; gap: 5px; }
+.historico-total span, .historico-total small { color: #637086; font-size: 12px; }
+.historico-total strong { font-size: 25px; font-variant-numeric: tabular-nums; }
+.historico-filtros { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto; gap: 14px; align-items: end; }
+.historico-filtros label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 700; }
+.historico-filtros input { width: 100%; min-width: 0; height: 46px; border: 1px solid #d8e0ea; border-radius: 10px; padding: 10px 12px; background: white; color: #111b2e; }
+.historico-consultar, .historico-limpar { min-height: 46px; padding: 10px 18px; border-radius: 10px; font-weight: 600; font-size: 14px; }
+.historico-consultar { background: #111b2e; color: white; border: 1px solid #111b2e; }
+.historico-limpar { background: white; color: #111b2e; border: 1px solid #d8e0ea; }
+.historico-filtros button:disabled { opacity: .6; cursor: wait; }
+.historico-categorias { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.historico-categorias button { display: inline-flex; align-items: center; gap: 7px; border: 1px solid #d8e0ea; padding: 7px 12px; border-radius: 20px; background: white; color: #334155; font-size: 13px; max-width: 100%; overflow-wrap: anywhere; }
+.historico-categorias button[aria-pressed='true'] { background: #eef3f8; border-color: #70849e; color: #07162e; }
+.historico-ponto { display: inline-block; width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; }
+.historico-periodo { margin: 20px 0 10px; color: #637086; font-size: 13px; }
+.historico-tabela-container { width: 100%; overflow-x: auto; }
+.historico-tabela { width: 100%; min-width: 700px; border-collapse: collapse; table-layout: fixed; font-size: 14px; }
+.historico-tabela th { padding: 14px 12px; text-align: left; color: #637086; font-size: 12px; font-weight: 600; border-bottom: 1px solid #ccd6e2; }
+.historico-tabela td { padding: 18px 12px; border-bottom: 1px solid #e5eaf1; vertical-align: top; overflow-wrap: anywhere; line-height: 1.5; }
+.historico-tabela th:nth-child(1) { width: 15%; }
+.historico-tabela th:nth-child(2) { width: 13%; }
+.historico-tabela th:nth-child(3) { width: 20%; }
+.historico-tabela th:nth-child(4) { width: 32%; }
+.historico-tabela th:last-child { width: 20%; }
+.historico-tabela td:last-child, .historico-tabela th:last-child { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.historico-tabela tbody tr:hover { background: #f7f9fc; }
+.historico-categoria { display: flex; align-items: baseline; gap: 8px; }
+.historico-receita { color: #286346; text-transform: capitalize; font-weight: 600; }
+.historico-tipo { text-transform: capitalize; color: #7e4351; font-weight: 600; }
+.historico-contagem { margin-top: 18px; color: #637086; font-size: 12px; }
+.historico-estado { padding: 40px 16px; text-align: center; color: #637086; line-height: 1.6; background: #f7f9fc; border-radius: 12px; }
+.historico-erro { margin: 16px 0; padding: 14px; color: #991b1b; background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; font-size: 14px; }
+.historico-erro button { margin-top: 12px; }
+.orbi-navegacao a:focus-visible, .historico-pagina button:focus-visible, .historico-pagina input:focus-visible, .historico-tabela-container:focus-visible { outline: 3px solid #70849e; outline-offset: 3px; }
+.historico-sr { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (max-width: 880px) {
+  .historico-filtros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .orbi-navegacao { padding: 12px; align-items: flex-start; flex-direction: column; gap: 10px; }
+  .orbi-links { width: 100%; }
+  .orbi-links a { flex: 1; text-align: center; padding: 10px; font-size: 12px; }
+  .historico-pagina { padding: 10px; }
+  .historico-cartao { padding: 22px 16px; }
+  .historico-cabecalho { flex-direction: column; gap: 18px; }
+  .historico-total { text-align: left; }
+  .historico-filtros { grid-template-columns: 1fr; }
+}
