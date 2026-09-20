@@ -1,37 +1,34 @@
 import { useEffect, useState } from 'react'
 import RegistrarReceita from './pages/RegistrarReceita'
-import HistoricoRegistros from './pages/HistoricoRegistro'
+import HistoricoRegistro from './pages/HistoricoRegistro'
+import MetasFinanceiras from './pages/MetasFinanceiras'
 import './styles/historicoRegistros.css'
 
+function paginaAtual() {
+  if (window.location.hash === '#/metas') return 'metas'
+  if (window.location.hash === '#/historico') return 'historico'
+  return 'receitas'
+}
 function App() {
-  const [historico, setHistorico] = useState(
-    () => window.location.hash === '#/historico',
-  )
-
+  const [pagina, setPagina] = useState(paginaAtual)
   useEffect(() => {
-    function acompanharNavegacao() {
-      setHistorico(window.location.hash === '#/historico')
-    }
-    window.addEventListener('hashchange', acompanharNavegacao)
-    return () => window.removeEventListener('hashchange', acompanharNavegacao)
+    function navegar() { setPagina(paginaAtual()) }
+    window.addEventListener('hashchange', navegar)
+    return () => window.removeEventListener('hashchange', navegar)
   }, [])
-
   return (
     <div className="orbi-aplicacao">
       <nav className="orbi-navegacao" aria-label="Navegação principal">
         <span className="orbi-marca">ORBI</span>
         <div className="orbi-links">
-          <a href="#/receitas" aria-current={!historico ? 'page' : undefined}>
-            Registrar receita
-          </a>
-          <a href="#/historico" aria-current={historico ? 'page' : undefined}>
-            Consultar histórico
-          </a>
+          <a href="#/receitas" aria-current={pagina === 'receitas' ? 'page' : undefined}>Registrar receita</a>
+          <a href="#/historico" aria-current={pagina === 'historico' ? 'page' : undefined}>Consultar histórico</a>
+          <a href="#/metas" aria-current={pagina === 'metas' ? 'page' : undefined}>Metas financeiras</a>
         </div>
       </nav>
-      {historico ? <HistoricoRegistros /> : <RegistrarReceita />}
+      {pagina === 'metas' ? <MetasFinanceiras /> : pagina === 'historico' ? <HistoricoRegistro /> : <RegistrarReceita />}
     </div>
   )
 }
-
 export default App
+

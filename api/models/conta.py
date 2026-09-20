@@ -11,7 +11,7 @@ class Conta(Base):
     senha = Column(String(200), nullable=False)
     data_criacao = Column(DateTime, nullable=False)
     saldo = Column(Numeric(12, 2), nullable=False, default=0.00)
-    
+    metas = relationship("Meta", back_populates="conta",)
     usuario = relationship("Usuario", back_populates="contas")
     categorias = relationship("Categoria", back_populates="conta")
     registros = relationship("Registro", back_populates="conta")
