@@ -1,0 +1,98 @@
+/* Estilos originais das categorias e notas */
+.lista-categorias.lista-despesas button[data-cor]::before {
+  background-color: var(--cor-categoria);
+}
+
+.lista-categorias.lista-despesas button {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.nota-campo {
+  color: #8490a3;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.nota-erro {
+  color: #991b1b;
+}
+
+/* =========================================
+   Últimas Despesas no Painel Lateral
+   ========================================= */
+
+.divisor-painel {
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 24px 0 16px;
+  width: 100%;
+}
+
+.titulo-secao-despesas {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.lista-ultimas-despesas {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item-ultima-despesa {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 10px 14px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.item-ultima-despesa:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.info-despesa-recente {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.marcador-cor {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.texto-despesa {
+  display: flex;
+  flex-direction: column;
+}
+
+.categoria-recente {
+  color: #f8fafc;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.descricao-recente {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+
+.valor-negativo {
+  color: #ff6b6b;
+  font-weight: 600;
+  font-size: 0.9rem;
+}

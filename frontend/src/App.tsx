@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import RegistrarReceita from './pages/RegistrarReceita'
+import RegistrarDespesa from './pages/RegistrarDespesa'
 import HistoricoRegistro from './pages/HistoricoRegistro'
 import MetasFinanceiras from './pages/MetasFinanceiras'
 import './styles/historicoRegistros.css'
 
 function paginaAtual() {
   if (window.location.hash === '#/metas') return 'metas'
+  if (window.location.hash === '#/despesas') return 'despesas'
   if (window.location.hash === '#/historico') return 'historico'
   return 'receitas'
 }
@@ -22,13 +24,13 @@ function App() {
         <span className="orbi-marca">ORBI</span>
         <div className="orbi-links">
           <a href="#/receitas" aria-current={pagina === 'receitas' ? 'page' : undefined}>Registrar receita</a>
+          <a href="#/despesas" aria-current={pagina === 'despesas' ? 'page' : undefined}>Registrar despesa</a>
           <a href="#/historico" aria-current={pagina === 'historico' ? 'page' : undefined}>Consultar histórico</a>
           <a href="#/metas" aria-current={pagina === 'metas' ? 'page' : undefined}>Metas financeiras</a>
         </div>
       </nav>
-      {pagina === 'metas' ? <MetasFinanceiras /> : pagina === 'historico' ? <HistoricoRegistro /> : <RegistrarReceita />}
+      {pagina === 'metas' ? <MetasFinanceiras /> : pagina === 'historico' ? <HistoricoRegistro /> : pagina === 'despesas' ? <RegistrarDespesa /> : <RegistrarReceita />}
     </div>
   )
 }
 export default App
-

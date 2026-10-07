@@ -1,6 +1,6 @@
 from datetime import date
 from typing import Optional
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, field_validator
  
  
 class ReceitaCreate(BaseModel):
@@ -10,6 +10,12 @@ class ReceitaCreate(BaseModel):
     nova_categoria: Optional[str] = None
     descricao: Optional[str] = None
  
+    @field_validator("nova_categoria", "descricao", mode="before")
+    @classmethod
+    def limpar_texto(cls, valor):
+        if isinstance(valor, str):
+            return valor.strip() or None
+        return valor
     
     @model_validator(mode="after")
     def valida_categoria(self):
