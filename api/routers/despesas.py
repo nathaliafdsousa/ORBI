@@ -1,5 +1,5 @@
 import logging
-from datetime import date, datetime, time
+from datetime import datetime, time
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -8,18 +8,17 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from database import get_db
-from models import Conta, Categoria, Registro
-from schemas import ReceitaCreate, ReceitaOut
+from models import Conta, Categoria, Registro, Meta, AporteMeta
+from schemas import DespesaCreate, DespesaOut, CategoriaDespesaOut
 
-router = APIRouter(prefix="/receitas", tags=["Receitas"])
+router = APIRouter(prefix="/despesas", tags=["Despesas"])
 logger = logging.getLogger(__name__)
 ID_CONTA_TESTE = 2
 ZERO = Decimal("0.00")
-SALDO_MAXIMO = Decimal("9999999999.99")
 
 
-@router.post("", response_model=ReceitaOut, status_code=status.HTTP_201_CREATED)
-def registrar_receita(dados: ReceitaCreate, db: Session = Depends(get_db)):
+@router.post("", response_model=DespesaOut, status_code=status.HTTP_201_CREATED)
+def registrar_despesa(dados: DespesaCreate, db: Session = Depends(get_db)):
     try:
         # Todas as gravações de saldo e reservas bloqueiam primeiro esta conta.
         conta = (
@@ -32,9 +31,19 @@ def registrar_receita(dados: ReceitaCreate, db: Session = Depends(get_db)):
             raise HTTPException(status_code=404, detail="Conta não encontrada.")
 
         saldo = conta.saldo if conta.saldo is not None else ZERO
-        novo_saldo = saldo + Decimal(str(dados.valor))
-        if novo_saldo > SALDO_MAXIMO:
-            raise HTTPException(status_code=400, detail="O saldo ultrapassaria o limite suportado.")
+        reservado = (
+            db.query(func.sum(AporteMeta.valor))
+            .join(Meta, Meta.id_meta == AporteMeta.id_meta)
+            .filter(Meta.id_conta == ID_CONTA_TESTE)
+            .scalar()
+        ) or ZERO
+        saldo_disponivel = saldo - reservado
+        if dados.valor > saldo_disponivel:
+            raise HTTPException(
+                status_code=400,
+                detail="Saldo disponível insuficiente. Os valores reservados em metas não podem ser utilizados.",
+            )
+        novo_saldo = saldo - dados.valor
 
         if dados.id_categoria is not None:
             categoria = (
@@ -47,10 +56,10 @@ def registrar_receita(dados: ReceitaCreate, db: Session = Depends(get_db)):
             )
             if categoria is None:
                 raise HTTPException(status_code=404, detail="Categoria não encontrada.")
-            if categoria.tipo.strip().lower() != "receita":
+            if categoria.tipo.strip().lower() != "despesa":
                 raise HTTPException(
                     status_code=400,
-                    detail="Selecione uma categoria do tipo receita.",
+                    detail="Selecione uma categoria do tipo despesa.",
                 )
         else:
             # Reutiliza uma categoria do mesmo nome, tipo e conta.
@@ -58,7 +67,7 @@ def registrar_receita(dados: ReceitaCreate, db: Session = Depends(get_db)):
                 db.query(Categoria)
                 .filter(
                     Categoria.id_conta == ID_CONTA_TESTE,
-                    func.lower(func.trim(Categoria.tipo)) == "receita",
+                    func.lower(func.trim(Categoria.tipo)) == "despesa",
                     func.lower(func.trim(Categoria.nome)) == dados.nova_categoria.lower(),
                 )
                 .order_by(Categoria.id_categoria)
@@ -68,7 +77,7 @@ def registrar_receita(dados: ReceitaCreate, db: Session = Depends(get_db)):
                 categoria = Categoria(
                     id_conta=ID_CONTA_TESTE,
                     nome=dados.nova_categoria,
-                    tipo="receita",
+                    tipo="despesa",
                 )
                 db.add(categoria)
                 db.flush()
@@ -85,7 +94,7 @@ def registrar_receita(dados: ReceitaCreate, db: Session = Depends(get_db)):
         db.flush()
 
         # Valida a resposta antes de confirmar a transação.
-        resposta = ReceitaOut(
+        resposta = DespesaOut(
             id_registro=registro.id_registro,
             valor=float(dados.valor),
             data=dados.data,
@@ -93,6 +102,8 @@ def registrar_receita(dados: ReceitaCreate, db: Session = Depends(get_db)):
             categoria_nome=categoria.nome,
             descricao=registro.descricao,
             saldo_atual=float(novo_saldo),
+            valor_reservado=float(reservado),
+            saldo_disponivel=float(novo_saldo - reservado),
         )
         db.commit()
         return resposta
@@ -102,80 +113,28 @@ def registrar_receita(dados: ReceitaCreate, db: Session = Depends(get_db)):
         raise
     except SQLAlchemyError:
         db.rollback()
-        logger.exception("Erro ao registrar receita.")
-        raise HTTPException(status_code=500, detail="Não foi possível registrar a receita.")
+        logger.exception("Erro ao registrar despesa.")
+        raise HTTPException(status_code=500, detail="Não foi possível registrar a despesa.")
     except Exception:
         db.rollback()
         raise
 
 
-@router.get("/resumo-mensal")
-def consultar_resumo_mensal(db: Session = Depends(get_db)):
-    conta = (
-        db.query(Conta)
-        .filter(Conta.id_conta == ID_CONTA_TESTE)
-        .first()
-    )
-
+@router.get("/categorias", response_model=list[CategoriaDespesaOut])
+def listar_categorias_despesa(db: Session = Depends(get_db)):
+    conta = db.query(Conta.id_conta).filter(Conta.id_conta == ID_CONTA_TESTE).first()
     if conta is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Conta não encontrada.",
-        )
-
-    hoje = date.today()
-
-    inicio_mes = datetime(hoje.year, hoje.month, 1)
-
-    if hoje.month == 12:
-        inicio_proximo_mes = datetime(hoje.year + 1, 1, 1)
-    else:
-        inicio_proximo_mes = datetime(
-            hoje.year,
-            hoje.month + 1,
-            1,
-        )
-
-    resultados = (
-        db.query(
-            Categoria.id_categoria,
-            Categoria.nome,
-            func.sum(Registro.valor).label("total"),
-        )
-        .join(
-            Registro,
-            Registro.id_categoria == Categoria.id_categoria,
-        )
+        raise HTTPException(status_code=404, detail="Conta não encontrada.")
+    categorias = (
+        db.query(Categoria)
         .filter(
-            Registro.id_conta == ID_CONTA_TESTE,
             Categoria.id_conta == ID_CONTA_TESTE,
-            func.lower(Categoria.tipo) == "receita",
-            Registro.data >= inicio_mes,
-            Registro.data < inicio_proximo_mes,
+            func.lower(func.trim(Categoria.tipo)) == "despesa",
         )
-        .group_by(
-            Categoria.id_categoria,
-            Categoria.nome,
-        )
-        .order_by(Categoria.id_categoria)
+        .order_by(Categoria.nome, Categoria.id_categoria)
         .all()
     )
-
-    total_mes = sum(
-        (item.total for item in resultados),
-        Decimal("0.00"),
-    )
-
-    return {
-        "ano": hoje.year,
-        "mes": hoje.month,
-        "total_mes": float(total_mes),
-        "categorias": [
-            {
-                "id_categoria": item.id_categoria,
-                "nome": item.nome,
-                "total": float(item.total),
-            }
-            for item in resultados
-        ],
-    }
+    return [
+        CategoriaDespesaOut(id_categoria=item.id_categoria, nome=item.nome)
+        for item in categorias
+    ]
