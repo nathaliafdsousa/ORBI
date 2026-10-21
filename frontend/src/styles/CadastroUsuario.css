@@ -1,0 +1,264 @@
+/* CadastroUsuario.css */
+
+.cadastro-pagina {
+  width: 100%;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(340px, 5fr) minmax(0, 7fr);
+  background-color: #f0f4f8;
+}
+
+/* ---------- Painel lateral ---------- */
+
+.cadastro-lateral {
+  min-width: 0;
+  padding: 50px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 40px;
+  color: #ffffff;
+  background-color: #0d1526;
+}
+
+.cadastro-sobretitulo {
+  color: #d88d17;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+}
+
+.cadastro-apresentacao h2 {
+  margin: 14px 0 0;
+  font-size: clamp(26px, 2.6vw, 36px);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.cadastro-apresentacao p {
+  margin: 14px 0 28px;
+  color: #a0aec0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* Ilustrações e cards laterais */
+
+.preview-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card-preview {
+  background: #172238;
+  border: 1px solid #23314d;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.card-saldo small {
+  color: #8fa0be;
+  font-size: 12px;
+}
+
+.card-saldo strong {
+  display: block;
+  font-size: 22px;
+  margin: 6px 0 10px;
+}
+
+.barra-progresso-saldo {
+  height: 6px;
+  background: linear-gradient(90deg, #74c69d 70%, #b5838d 100%);
+  border-radius: 4px;
+}
+
+.card-extrato {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.linha-extrato {
+  display: flex;
+  justify-content: space-between;
+}
+
+.linha-extrato.positivo span:last-child {
+  color: #74c69d;
+  font-weight: 600;
+}
+
+.linha-extrato.negativo span:last-child {
+  color: #e57373;
+  font-weight: 600;
+}
+
+.card-meta .linha-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.barra-progresso-meta {
+  height: 6px;
+  background: #23314d;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.barra-progresso-meta::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 62%;
+  background-color: #d88d17;
+}
+
+.cadastro-nota {
+  color: #63738a;
+  font-size: 12px;
+}
+
+/* ---------- Área do formulário ---------- */
+
+.cadastro-conteudo {
+  min-width: 0;
+  padding: 40px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cadastro-cartao {
+  width: 100%;
+  max-width: 580px;
+  padding: 40px;
+  background-color: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+}
+
+.cadastro-cartao header h1 {
+  margin: 10px 0 4px;
+  color: #0d1526;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.cadastro-cartao header p {
+  color: #718096;
+  font-size: 14px;
+  margin-bottom: 28px;
+}
+
+/* Stepper */
+
+.stepper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #a0aec0;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #edf2f7;
+  color: #718096;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.step-item.ativo .step-num {
+  background-color: #0d1526;
+  color: #ffffff;
+}
+
+.step-item.ativo .step-label {
+  color: #0d1526;
+  font-weight: 700;
+}
+
+.step-item.concluido .step-num {
+  background-color: #2b6cb0;
+  color: #ffffff;
+}
+
+.step-linha {
+  flex: 1;
+  height: 2px;
+  background-color: #e2e8f0;
+  margin: 0 12px;
+}
+
+/* Form e Ações */
+
+.cadastro-cartao form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.acoes-formulario {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.botao-voltar {
+  padding: 14px 20px;
+  border: 1px solid #cbd5e0;
+  background: transparent;
+  border-radius: 10px;
+  color: #4a5568;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.botao-registrar {
+  flex: 1;
+  padding: 14px;
+  background-color: #0d1526;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.botao-registrar:hover {
+  background-color: #1a263d;
+}
+
+/* Responsivo */
+
+@media (max-width: 900px) {
+  .cadastro-pagina {
+    grid-template-columns: 1fr;
+  }
+
+  .cadastro-lateral {
+    display: none;
+  }
+}

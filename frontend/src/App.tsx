@@ -3,13 +3,15 @@ import RegistrarReceita from './pages/RegistrarReceita'
 import RegistrarDespesa from './pages/RegistrarDespesa'
 import HistoricoRegistro from './pages/HistoricoRegistro'
 import MetasFinanceiras from './pages/MetasFinanceiras'
+import CadastroUsuario from './pages/CadastroUsuario'
 import './styles/historicoRegistros.css'
 
 function paginaAtual() {
   if (window.location.hash === '#/metas') return 'metas'
+  if (window.location.hash === '#/receitas') return 'receitas'
   if (window.location.hash === '#/despesas') return 'despesas'
   if (window.location.hash === '#/historico') return 'historico'
-  return 'receitas'
+  return 'cadastro'
 }
 function App() {
   const [pagina, setPagina] = useState(paginaAtual)
@@ -18,6 +20,8 @@ function App() {
     window.addEventListener('hashchange', navegar)
     return () => window.removeEventListener('hashchange', navegar)
   }, [])
+  if (pagina === 'cadastro') return <CadastroUsuario />
+
   return (
     <div className="orbi-aplicacao">
       <nav className="orbi-navegacao" aria-label="Navegação principal">

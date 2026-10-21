@@ -6,7 +6,7 @@ class Conta(Base):
     __tablename__ = "conta"
 
     id_conta = Column(Integer, primary_key=True, index=True)
-    id_usuario = Column(Integer, ForeignKey("usuario.id_usuario"), nullable=False)
+    id_usuario = Column(Integer, ForeignKey("usuarios.id_usuario"), nullable=False)
     email = Column(String(150), unique=True, nullable=False)
     senha = Column(String(200), nullable=False)
     data_criacao = Column(DateTime, nullable=False)
