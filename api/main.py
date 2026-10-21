@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from database import get_db
 from models import Conta
-from routers import receitas, registros, metas, despesas 
+from routers import receitas, registros, metas, despesas, usuarios
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title= "ORBI")
@@ -19,6 +19,7 @@ app.include_router(receitas.router)
 app.include_router(registros.router)
 app.include_router(metas.router)
 app.include_router(despesas.router)
+app.include_router(usuarios.router)
 @app.get("/")
 def raiz():
     return {"message": "Bem-vindo à API ORBI!"}
