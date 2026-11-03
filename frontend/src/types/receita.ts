@@ -21,6 +21,11 @@ export interface CategoriaOpcao {
   nome: string
 }
 
+export interface CategoriaReceita {
+  id_categoria: number
+  nome: string
+}
+
 export interface ResumoCategoria {
   id_categoria: number
   nome: string

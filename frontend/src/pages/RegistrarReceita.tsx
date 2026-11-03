@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { CATEGORIAS } from '../constants/categorias'
-import { consultarResumoMensal, registrarReceita } from '../services/receitaService'
-import type { ReceitaCreate, ResumoMensal } from '../types/receita'
+import {
+  consultarResumoMensal,
+  listarCategoriasReceita,
+  registrarReceita,
+} from '../services/receitaService'
+import type { CategoriaReceita, ReceitaCreate, ResumoMensal } from '../types/receita'
 import '../styles/RegistrarReceita.css'
 
 type CategoriaSelecionada = number | 'outra' | null
@@ -39,6 +42,28 @@ function RegistrarReceita() {
   const [novaCategoria, setNovaCategoria] = useState('')
   const [data, setData] = useState('')
   const [descricao, setDescricao] = useState('')
+
+  const [categorias, setCategorias] = useState<CategoriaReceita[]>([])
+  const [erroCategorias, setErroCategorias] = useState('')
+  const [versaoCategorias, setVersaoCategorias] = useState(0)
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    listarCategoriasReceita(controller.signal)
+      .then((lista) => {
+        if (controller.signal.aborted) return
+        setCategorias(lista)
+        setErroCategorias('')
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setErroCategorias('Não foi possível carregar as categorias.')
+        }
+      })
+
+    return () => controller.abort()
+  }, [versaoCategorias])
 
   const [resumo, setResumo] = useState<ResumoMensal | null>(null)
   const [carregandoResumo, setCarregandoResumo] = useState(true)
@@ -122,6 +147,10 @@ function RegistrarReceita() {
 
       await registrarReceita(receita)
 
+      if (categoria === 'outra') {
+        setVersaoCategorias((anterior) => anterior + 1)
+      }
+
       atualizarResumo()
       setMensagem('Receita registrada com sucesso!')
 
@@ -183,7 +212,7 @@ function RegistrarReceita() {
             <legend>Categoria</legend>
 
             <div className="lista-categorias">
-              {CATEGORIAS.map((item) => (
+              {categorias.map((item) => (
                 <button
                   key={item.id_categoria}
                   type="button"
@@ -207,6 +236,10 @@ function RegistrarReceita() {
                 Outra
               </button>
             </div>
+
+            {erroCategorias && (
+              <small className="nota-campo nota-erro">{erroCategorias}</small>
+            )}
           </fieldset>
 
           {categoria === 'outra' && (

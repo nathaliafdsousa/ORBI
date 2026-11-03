@@ -1,3 +1,4 @@
+import { fetchAutenticado } from './sessao'
 import type { FiltrosHistorico, RegistroHistorico } from '../types/registro'
 
 export async function consultarRegistros(
@@ -9,7 +10,7 @@ export async function consultarRegistros(
   if (filtros.data_final) parametros.set('data_final', filtros.data_final)
 
   const base = import.meta.env.VITE_API_URL
-  const resposta = await fetch(`${base}/registros?${parametros.toString()}`, { signal })
+  const resposta = await fetchAutenticado(`${base}/registros?${parametros.toString()}`, { signal })
 
   if (!resposta.ok) {
     const erro = await resposta.json().catch(() => null)

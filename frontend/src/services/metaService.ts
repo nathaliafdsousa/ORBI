@@ -1,3 +1,4 @@
+import { fetchAutenticado } from './sessao'
 import type { Meta, ResumoMetas, Aporte, MetaCreate, AporteCreate } from '../types/meta'
 
 async function requisitar<T>(caminho: string, opcoes: RequestInit = {}): Promise<T> {
@@ -5,7 +6,7 @@ async function requisitar<T>(caminho: string, opcoes: RequestInit = {}): Promise
   if (!base) throw new Error('A URL da API não foi configurada.')
   let resposta: Response
   try {
-    resposta = await fetch(`${base}${caminho}`, opcoes)
+    resposta = await fetchAutenticado(`${base}${caminho}`, opcoes)
   } catch (erro) {
     if (opcoes.signal?.aborted) throw erro
     throw new Error(

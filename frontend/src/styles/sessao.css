@@ -1,0 +1,59 @@
+/* Login, sessão e botão "Sair". Reaproveita as classes de CadastroUsuario.css. */
+
+.orbi-links .orbi-sair {
+  padding: 10px 16px;
+  color: #111b2e;
+  background: transparent;
+  border: 1px solid #d8e0ea;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
+}
+
+.orbi-links .orbi-sair:hover {
+  background-color: #f4f6f8;
+  border-color: #8292a7;
+}
+
+.orbi-links .orbi-sair:focus-visible {
+  outline: 3px solid #70849e;
+  outline-offset: 3px;
+}
+
+.mensagem-aviso {
+  color: #92400e;
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+}
+
+.cadastro-rodape {
+  margin: 18px 0 0;
+  color: #5f6b7d;
+  font-size: 14px;
+  text-align: center;
+}
+
+.cadastro-rodape a {
+  color: #111b2e;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.cadastro-rodape a:focus-visible {
+  outline: 3px solid #70849e;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (max-width: 560px) {
+  .orbi-links .orbi-sair {
+    flex: 1;
+    padding: 10px;
+    font-size: 12px;
+  }
+}
