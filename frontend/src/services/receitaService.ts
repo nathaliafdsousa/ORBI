@@ -1,4 +1,6 @@
+import { fetchAutenticado } from './sessao'
 import type {
+  CategoriaReceita,
   ReceitaCreate,
   ReceitaResponse,
   ResumoMensal,
@@ -17,7 +19,7 @@ const API_URL = import.meta.env.VITE_API_URL
 export async function registrarReceita(
   receita: ReceitaCreate,
 ): Promise<ReceitaResponse> {
-  const resposta = await fetch(`${API_URL}/receitas`, {
+  const resposta = await fetchAutenticado(`${API_URL}/receitas`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -53,7 +55,7 @@ export async function registrarReceita(
 export async function consultarResumoMensal(
   signal?: AbortSignal,
 ): Promise<ResumoMensal> {
-  const resposta = await fetch(
+  const resposta = await fetchAutenticado(
     `${API_URL}/receitas/resumo-mensal`,
     { signal },
   )
@@ -65,4 +67,18 @@ export async function consultarResumoMensal(
   }
 
   return resposta.json() as Promise<ResumoMensal>
+}
+
+export async function listarCategoriasReceita(
+  signal?: AbortSignal,
+): Promise<CategoriaReceita[]> {
+  const resposta = await fetchAutenticado(`${API_URL}/receitas/categorias`, {
+    signal,
+  })
+
+  if (!resposta.ok) {
+    throw new Error('Não foi possível carregar as categorias.')
+  }
+
+  return resposta.json() as Promise<CategoriaReceita[]>
 }

@@ -34,4 +34,8 @@ class ReceitaOut(BaseModel):
     categoria_nome: str
     descricao: Optional[str] = None
     saldo_atual: float
- 
+
+
+class CategoriaReceitaOut(BaseModel):
+    id_categoria: int
+    nome: str

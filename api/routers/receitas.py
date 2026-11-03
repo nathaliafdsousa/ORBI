@@ -7,24 +7,28 @@ from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from autenticacao import get_id_conta_atual
 from database import get_db
 from models import Conta, Categoria, Registro
-from schemas import ReceitaCreate, ReceitaOut
+from schemas import CategoriaReceitaOut, ReceitaCreate, ReceitaOut
 
 router = APIRouter(prefix="/receitas", tags=["Receitas"])
 logger = logging.getLogger(__name__)
-ID_CONTA_TESTE = 2
 ZERO = Decimal("0.00")
 SALDO_MAXIMO = Decimal("9999999999.99")
 
 
 @router.post("", response_model=ReceitaOut, status_code=status.HTTP_201_CREATED)
-def registrar_receita(dados: ReceitaCreate, db: Session = Depends(get_db)):
+def registrar_receita(
+    dados: ReceitaCreate,
+    id_conta: int = Depends(get_id_conta_atual),
+    db: Session = Depends(get_db),
+):
     try:
         # Todas as gravações de saldo e reservas bloqueiam primeiro esta conta.
         conta = (
             db.query(Conta)
-            .filter(Conta.id_conta == ID_CONTA_TESTE)
+            .filter(Conta.id_conta == id_conta)
             .with_for_update()
             .first()
         )
@@ -32,7 +36,8 @@ def registrar_receita(dados: ReceitaCreate, db: Session = Depends(get_db)):
             raise HTTPException(status_code=404, detail="Conta não encontrada.")
 
         saldo = conta.saldo if conta.saldo is not None else ZERO
-        novo_saldo = saldo + Decimal(str(dados.valor))
+        valor = Decimal(str(dados.valor))
+        novo_saldo = saldo + valor
         if novo_saldo > SALDO_MAXIMO:
             raise HTTPException(status_code=400, detail="O saldo ultrapassaria o limite suportado.")
 
@@ -41,7 +46,7 @@ def registrar_receita(dados: ReceitaCreate, db: Session = Depends(get_db)):
                 db.query(Categoria)
                 .filter(
                     Categoria.id_categoria == dados.id_categoria,
-                    Categoria.id_conta == ID_CONTA_TESTE,
+                    Categoria.id_conta == id_conta,
                 )
                 .first()
             )
@@ -57,7 +62,7 @@ def registrar_receita(dados: ReceitaCreate, db: Session = Depends(get_db)):
             categoria = (
                 db.query(Categoria)
                 .filter(
-                    Categoria.id_conta == ID_CONTA_TESTE,
+                    Categoria.id_conta == id_conta,
                     func.lower(func.trim(Categoria.tipo)) == "receita",
                     func.lower(func.trim(Categoria.nome)) == dados.nova_categoria.lower(),
                 )
@@ -66,7 +71,7 @@ def registrar_receita(dados: ReceitaCreate, db: Session = Depends(get_db)):
             )
             if categoria is None:
                 categoria = Categoria(
-                    id_conta=ID_CONTA_TESTE,
+                    id_conta=id_conta,
                     nome=dados.nova_categoria,
                     tipo="receita",
                 )
@@ -74,9 +79,9 @@ def registrar_receita(dados: ReceitaCreate, db: Session = Depends(get_db)):
                 db.flush()
 
         registro = Registro(
-            id_conta=ID_CONTA_TESTE,
+            id_conta=id_conta,
             id_categoria=categoria.id_categoria,
-            valor=dados.valor,
+            valor=valor,
             data=datetime.combine(dados.data, time.min),
             descricao=dados.descricao,
         )
@@ -110,10 +115,13 @@ def registrar_receita(dados: ReceitaCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/resumo-mensal")
-def consultar_resumo_mensal(db: Session = Depends(get_db)):
+def consultar_resumo_mensal(
+    id_conta: int = Depends(get_id_conta_atual),
+    db: Session = Depends(get_db),
+):
     conta = (
         db.query(Conta)
-        .filter(Conta.id_conta == ID_CONTA_TESTE)
+        .filter(Conta.id_conta == id_conta)
         .first()
     )
 
@@ -147,8 +155,8 @@ def consultar_resumo_mensal(db: Session = Depends(get_db)):
             Registro.id_categoria == Categoria.id_categoria,
         )
         .filter(
-            Registro.id_conta == ID_CONTA_TESTE,
-            Categoria.id_conta == ID_CONTA_TESTE,
+            Registro.id_conta == id_conta,
+            Categoria.id_conta == id_conta,
             func.lower(Categoria.tipo) == "receita",
             Registro.data >= inicio_mes,
             Registro.data < inicio_proximo_mes,
@@ -179,3 +187,24 @@ def consultar_resumo_mensal(db: Session = Depends(get_db)):
             for item in resultados
         ],
     }
+
+
+
+@router.get("/categorias", response_model=list[CategoriaReceitaOut])
+def listar_categorias_receita(
+    id_conta: int = Depends(get_id_conta_atual),
+    db: Session = Depends(get_db),
+):
+    categorias = (
+        db.query(Categoria)
+        .filter(
+            Categoria.id_conta == id_conta,
+            func.lower(func.trim(Categoria.tipo)) == "receita",
+        )
+        .order_by(Categoria.nome, Categoria.id_categoria)
+        .all()
+    )
+    return [
+        CategoriaReceitaOut(id_categoria=item.id_categoria, nome=item.nome)
+        for item in categorias
+    ]

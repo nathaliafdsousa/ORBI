@@ -1,3 +1,4 @@
+import { fetchAutenticado } from './sessao'
 import type {
   CategoriaDespesa,
   DespesaCreate,
@@ -41,7 +42,7 @@ export async function registrarDespesa(
   let resposta: Response
 
   try {
-    resposta = await fetch(`${urlBase()}/despesas`, {
+    resposta = await fetchAutenticado(`${urlBase()}/despesas`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(despesa),
@@ -66,7 +67,7 @@ export async function registrarDespesa(
 export async function listarCategoriasDespesa(
   signal?: AbortSignal,
 ): Promise<CategoriaDespesa[]> {
-  const resposta = await fetch(`${urlBase()}/despesas/categorias`, {
+  const resposta = await fetchAutenticado(`${urlBase()}/despesas/categorias`, {
     signal,
   })
 
