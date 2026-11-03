@@ -7,23 +7,27 @@ from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from autenticacao import get_id_conta_atual
 from database import get_db
 from models import Conta, Categoria, Registro, Meta, AporteMeta
 from schemas import DespesaCreate, DespesaOut, CategoriaDespesaOut
 
 router = APIRouter(prefix="/despesas", tags=["Despesas"])
 logger = logging.getLogger(__name__)
-ID_CONTA_TESTE = 2
 ZERO = Decimal("0.00")
 
 
 @router.post("", response_model=DespesaOut, status_code=status.HTTP_201_CREATED)
-def registrar_despesa(dados: DespesaCreate, db: Session = Depends(get_db)):
+def registrar_despesa(
+    dados: DespesaCreate,
+    id_conta: int = Depends(get_id_conta_atual),
+    db: Session = Depends(get_db),
+):
     try:
         # Todas as gravações de saldo e reservas bloqueiam primeiro esta conta.
         conta = (
             db.query(Conta)
-            .filter(Conta.id_conta == ID_CONTA_TESTE)
+            .filter(Conta.id_conta == id_conta)
             .with_for_update()
             .first()
         )
@@ -34,7 +38,7 @@ def registrar_despesa(dados: DespesaCreate, db: Session = Depends(get_db)):
         reservado = (
             db.query(func.sum(AporteMeta.valor))
             .join(Meta, Meta.id_meta == AporteMeta.id_meta)
-            .filter(Meta.id_conta == ID_CONTA_TESTE)
+            .filter(Meta.id_conta == id_conta)
             .scalar()
         ) or ZERO
         saldo_disponivel = saldo - reservado
@@ -50,7 +54,7 @@ def registrar_despesa(dados: DespesaCreate, db: Session = Depends(get_db)):
                 db.query(Categoria)
                 .filter(
                     Categoria.id_categoria == dados.id_categoria,
-                    Categoria.id_conta == ID_CONTA_TESTE,
+                    Categoria.id_conta == id_conta,
                 )
                 .first()
             )
@@ -66,7 +70,7 @@ def registrar_despesa(dados: DespesaCreate, db: Session = Depends(get_db)):
             categoria = (
                 db.query(Categoria)
                 .filter(
-                    Categoria.id_conta == ID_CONTA_TESTE,
+                    Categoria.id_conta == id_conta,
                     func.lower(func.trim(Categoria.tipo)) == "despesa",
                     func.lower(func.trim(Categoria.nome)) == dados.nova_categoria.lower(),
                 )
@@ -75,7 +79,7 @@ def registrar_despesa(dados: DespesaCreate, db: Session = Depends(get_db)):
             )
             if categoria is None:
                 categoria = Categoria(
-                    id_conta=ID_CONTA_TESTE,
+                    id_conta=id_conta,
                     nome=dados.nova_categoria,
                     tipo="despesa",
                 )
@@ -83,7 +87,7 @@ def registrar_despesa(dados: DespesaCreate, db: Session = Depends(get_db)):
                 db.flush()
 
         registro = Registro(
-            id_conta=ID_CONTA_TESTE,
+            id_conta=id_conta,
             id_categoria=categoria.id_categoria,
             valor=dados.valor,
             data=datetime.combine(dados.data, time.min),
@@ -121,14 +125,17 @@ def registrar_despesa(dados: DespesaCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/categorias", response_model=list[CategoriaDespesaOut])
-def listar_categorias_despesa(db: Session = Depends(get_db)):
-    conta = db.query(Conta.id_conta).filter(Conta.id_conta == ID_CONTA_TESTE).first()
+def listar_categorias_despesa(
+    id_conta: int = Depends(get_id_conta_atual),
+    db: Session = Depends(get_db),
+):
+    conta = db.query(Conta.id_conta).filter(Conta.id_conta == id_conta).first()
     if conta is None:
         raise HTTPException(status_code=404, detail="Conta não encontrada.")
     categorias = (
         db.query(Categoria)
         .filter(
-            Categoria.id_conta == ID_CONTA_TESTE,
+            Categoria.id_conta == id_conta,
             func.lower(func.trim(Categoria.tipo)) == "despesa",
         )
         .order_by(Categoria.nome, Categoria.id_categoria)

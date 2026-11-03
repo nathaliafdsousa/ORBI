@@ -6,6 +6,7 @@ from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from autenticacao import get_id_conta_atual
 from database import get_db
 from models import Conta, Meta, AporteMeta
 from schemas import MetaCreate, MetaOut, AporteCreate, AporteOut
@@ -15,13 +16,12 @@ router = APIRouter(prefix="/metas", tags=["Metas financeiras"])
 
 logger = logging.getLogger(__name__)
 
-ID_CONTA_TESTE = 2
 ZERO = Decimal("0.00")
 
 
-def buscar_conta(db: Session, bloquear: bool = False):
+def buscar_conta(db: Session, id_conta: int, bloquear: bool = False):
     consulta = db.query(Conta).filter(
-        Conta.id_conta == ID_CONTA_TESTE
+        Conta.id_conta == id_conta
     )
 
     if bloquear:
@@ -38,12 +38,12 @@ def buscar_conta(db: Session, bloquear: bool = False):
     return conta
 
 
-def buscar_meta(db: Session, id_meta: int):
+def buscar_meta(db: Session, id_meta: int, id_conta: int):
     meta = (
         db.query(Meta)
         .filter(
             Meta.id_meta == id_meta,
-            Meta.id_conta == ID_CONTA_TESTE,
+            Meta.id_conta == id_conta,
         )
         .first()
     )
@@ -67,11 +67,11 @@ def calcular_acumulado(db: Session, id_meta: int):
     return total if total is not None else ZERO
 
 
-def calcular_reservado(db: Session):
+def calcular_reservado(db: Session, id_conta: int):
     total = (
         db.query(func.sum(AporteMeta.valor))
         .join(Meta, Meta.id_meta == AporteMeta.id_meta)
-        .filter(Meta.id_conta == ID_CONTA_TESTE)
+        .filter(Meta.id_conta == id_conta)
         .scalar()
     )
 
@@ -110,13 +110,14 @@ def montar_resposta_meta(db: Session, meta: Meta):
 )
 def criar_meta(
     dados: MetaCreate,
+    id_conta: int = Depends(get_id_conta_atual),
     db: Session = Depends(get_db),
 ):
-    buscar_conta(db)
+    buscar_conta(db, id_conta)
 
     try:
         meta = Meta(
-            id_conta=ID_CONTA_TESTE,
+            id_conta=id_conta,
             nome=dados.nome,
             valor_desejado=dados.valor_desejado,
         )
@@ -141,12 +142,15 @@ def criar_meta(
 
 
 @router.get("", response_model=list[MetaOut])
-def listar_metas(db: Session = Depends(get_db)):
-    buscar_conta(db)
+def listar_metas(
+    id_conta: int = Depends(get_id_conta_atual),
+    db: Session = Depends(get_db),
+):
+    buscar_conta(db, id_conta)
 
     metas = (
         db.query(Meta)
-        .filter(Meta.id_conta == ID_CONTA_TESTE)
+        .filter(Meta.id_conta == id_conta)
         .order_by(Meta.id_meta.desc())
         .all()
     )
@@ -158,13 +162,16 @@ def listar_metas(db: Session = Depends(get_db)):
 
 
 @router.get("/resumo")
-def consultar_resumo(db: Session = Depends(get_db)):
+def consultar_resumo(
+    id_conta: int = Depends(get_id_conta_atual),
+    db: Session = Depends(get_db),
+):
 
-    conta = buscar_conta(db, bloquear=True)
+    conta = buscar_conta(db, id_conta, bloquear=True)
 
     try:
         saldo = conta.saldo if conta.saldo is not None else ZERO
-        reservado = calcular_reservado(db)
+        reservado = calcular_reservado(db, id_conta)
 
         return {
             "saldo_total": str(saldo),
@@ -185,15 +192,16 @@ def consultar_resumo(db: Session = Depends(get_db)):
 def registrar_aporte(
     id_meta: int,
     dados: AporteCreate,
+    id_conta: int = Depends(get_id_conta_atual),
     db: Session = Depends(get_db),
 ):
     try:
         # Serializa os aportes da conta para evitar que duas requisições reservem o mesmo saldo ao mesmo tempo.
-        conta = buscar_conta(db, bloquear=True)
-        meta = buscar_meta(db, id_meta)
+        conta = buscar_conta(db, id_conta, bloquear=True)
+        meta = buscar_meta(db, id_meta, id_conta)
 
         saldo = conta.saldo if conta.saldo is not None else ZERO
-        reservado = calcular_reservado(db)
+        reservado = calcular_reservado(db, id_conta)
         disponivel = saldo - reservado
 
         if dados.valor > disponivel:
@@ -254,9 +262,10 @@ def registrar_aporte(
 )
 def listar_aportes(
     id_meta: int,
+    id_conta: int = Depends(get_id_conta_atual),
     db: Session = Depends(get_db),
 ):
-    buscar_meta(db, id_meta)
+    buscar_meta(db, id_meta, id_conta)
 
     return (
         db.query(AporteMeta)

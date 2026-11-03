@@ -2,12 +2,12 @@ from datetime import date, datetime, time
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from autenticacao import get_id_conta_atual
 from database import get_db
 from models import Registro, Conta, Categoria
 
 router = APIRouter(prefix="/registros", tags=["Histórico de Registros"])
 
-ID_CONTA_TESTE = 2
 
 class RegistroHistoricoOut(BaseModel):
     id_registro: int
@@ -23,6 +23,7 @@ class RegistroHistoricoOut(BaseModel):
 def consultar_registros(
     data_inicial: date | None = None,
     data_final: date | None = None,
+    id_conta: int = Depends(get_id_conta_atual),
     db: Session = Depends(get_db),
 ):
     if data_inicial and data_final and data_inicial > data_final:
@@ -33,7 +34,7 @@ def consultar_registros(
 
     conta = (
         db.query(Conta)
-        .filter(Conta.id_conta == ID_CONTA_TESTE)
+        .filter(Conta.id_conta == id_conta)
         .first()
     )
 
@@ -55,8 +56,8 @@ def consultar_registros(
             Categoria.id_categoria == Registro.id_categoria,
         )
         .filter(
-            Registro.id_conta == ID_CONTA_TESTE,
-            Categoria.id_conta == ID_CONTA_TESTE,
+            Registro.id_conta == id_conta,
+            Categoria.id_conta == id_conta,
         )
     )
 
