@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
+import EditarLancamento from '../components/EditarLancamento'
+import ExcluirLancamento from '../components/ExcluirLancamento'
 import { consultarRegistros } from '../services/registroService'
 import type { FiltrosHistorico, RegistroHistorico } from '../types/registro'
+import '../styles/lancamentos.css'
 
 const CORES = ['#86a692', '#7e9bbc', '#a58cac', '#d2ac72', '#79b9b3', '#cb8c99']
 function corCategoria(id: number) {
@@ -23,6 +26,8 @@ export default function HistoricoRegistros() {
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [validacao, setValidacao] = useState('')
+  const [acao, setAcao] = useState<{ tipo: 'editar' | 'excluir'; registro: RegistroHistorico } | null>(null)
+  const [aviso, setAviso] = useState('')
   const requisicao = useRef<AbortController | null>(null)
 
   useEffect(() => {
@@ -48,9 +53,14 @@ export default function HistoricoRegistros() {
     setCarregando(true)
     setErro('')
     setValidacao('')
+    setAviso('')
     setRegistros([])
     setCategoria(null)
     setPedido({ filtros })
+  }
+
+  function recarregar() {
+    setPedido((anterior) => ({ filtros: anterior.filtros }))
   }
 
   function filtrar(event: FormEvent<HTMLFormElement>) {
@@ -74,9 +84,10 @@ export default function HistoricoRegistros() {
       nome: item.categoria_nome,
     }])).values(),
   ).sort((a, b) => a.id - b.id)
-  const listados = categoria === null
+  const categoriaAtiva = categorias.some((item) => item.id === categoria) ? categoria : null
+  const listados = categoriaAtiva === null
     ? registros
-    : registros.filter((item) => item.id_categoria === categoria)
+    : registros.filter((item) => item.id_categoria === categoriaAtiva)
   const totalCentavos = listados.reduce(
     (soma, item) => soma + Math.round(Math.abs(item.valor) * 100), 0,
   )
@@ -124,11 +135,11 @@ export default function HistoricoRegistros() {
 
         {!carregando && !erro && categorias.length > 0 && (
           <div className="historico-categorias" role="group" aria-label="Filtrar por categoria">
-            <button type="button" aria-pressed={categoria === null} onClick={() => setCategoria(null)}>
+            <button type="button" aria-pressed={categoriaAtiva === null} onClick={() => setCategoria(null)}>
               Todas
             </button>
             {categorias.map((item) => (
-              <button key={item.id} type="button" aria-pressed={categoria === item.id}
+              <button key={item.id} type="button" aria-pressed={categoriaAtiva === item.id}
                 onClick={() => setCategoria(item.id)}>
                 <span className="historico-ponto" style={{ background: corCategoria(item.id) }} aria-hidden="true" />
                 {item.nome}
@@ -144,6 +155,8 @@ export default function HistoricoRegistros() {
             <p className="historico-estado">Nenhum registro encontrado. Cadastre uma receita ou consulte outro período.</p>
           )}
         </div>
+        {aviso && <p className="historico-sucesso" role="status">{aviso}</p>}
+
         {erro && (
           <div className="historico-erro" role="alert">
             <p>{erro}</p>
@@ -157,12 +170,12 @@ export default function HistoricoRegistros() {
           <>
             <div className="historico-tabela-container" tabIndex={0}
               role="region" aria-label="Tabela de registros; role horizontalmente em telas pequenas">
-              <table className="historico-tabela">
+              <table className="historico-tabela com-acoes">
                 <caption className="historico-sr">Registros individuais do período consultado</caption>
                 <thead><tr>
                   <th scope="col">Data</th><th scope="col">Tipo</th>
                   <th scope="col">Categoria</th><th scope="col">Descrição</th>
-                  <th scope="col">Valor</th>
+                  <th scope="col">Valor</th><th scope="col">Ações</th>
                 </tr></thead>
                 <tbody>
                   {listados.map((item) => (
@@ -177,6 +190,20 @@ export default function HistoricoRegistros() {
                       </span></td>
                       <td>{item.descricao?.trim() || '—'}</td>
                       <td>{moeda(item.valor)}</td>
+                      <td>
+                        <div className="historico-acoes">
+                          <button type="button" className="acao-lancamento"
+                            aria-label={`Editar ${item.tipo.toLowerCase()} de ${moeda(item.valor)}, ${item.categoria_nome}`}
+                            onClick={() => setAcao({ tipo: 'editar', registro: item })}>
+                            Editar
+                          </button>
+                          <button type="button" className="acao-lancamento acao-excluir"
+                            aria-label={`Excluir ${item.tipo.toLowerCase()} de ${moeda(item.valor)}, ${item.categoria_nome}`}
+                            onClick={() => setAcao({ tipo: 'excluir', registro: item })}>
+                            Excluir
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -186,6 +213,30 @@ export default function HistoricoRegistros() {
           </>
         )}
       </section>
+
+      {acao?.tipo === 'editar' && (
+        <EditarLancamento
+          registro={acao.registro}
+          aoFechar={() => setAcao(null)}
+          aoSalvar={(resposta) => {
+            setAcao(null)
+            setAviso(`Lançamento atualizado. Saldo atual: ${moeda(resposta.saldo_atual)}.`)
+            recarregar()
+          }}
+        />
+      )}
+
+      {acao?.tipo === 'excluir' && (
+        <ExcluirLancamento
+          registro={acao.registro}
+          aoFechar={() => setAcao(null)}
+          aoExcluir={(resposta) => {
+            setAcao(null)
+            setAviso(`Lançamento excluído. Saldo atual: ${moeda(resposta.saldo_atual)}.`)
+            recarregar()
+          }}
+        />
+      )}
     </main>
   )
 }

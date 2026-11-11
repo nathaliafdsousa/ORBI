@@ -1,0 +1,239 @@
+/* Ações de editar/excluir no histórico e janelas modais.
+   Os seletores da tabela usam a classe .com-acoes para vencer historicoRegistros.css
+   independentemente da ordem de carregamento. */
+
+.historico-tabela.com-acoes {
+  min-width: 880px;
+}
+
+.historico-tabela.com-acoes th:nth-child(1) { width: 12%; }
+.historico-tabela.com-acoes th:nth-child(2) { width: 10%; }
+.historico-tabela.com-acoes th:nth-child(3) { width: 17%; }
+.historico-tabela.com-acoes th:nth-child(4) { width: 24%; }
+.historico-tabela.com-acoes th:nth-child(5) { width: 15%; }
+.historico-tabela.com-acoes th:nth-child(6) { width: 22%; }
+
+.historico-tabela.com-acoes td:nth-child(5),
+.historico-tabela.com-acoes th:nth-child(5) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.historico-tabela.com-acoes td:last-child,
+.historico-tabela.com-acoes th:last-child {
+  text-align: right;
+  font-variant-numeric: normal;
+  font-weight: 400;
+}
+
+.historico-tabela.com-acoes th:last-child {
+  font-weight: 600;
+}
+
+.historico-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.acao-lancamento {
+  min-height: 34px;
+  padding: 6px 12px;
+  color: #111b2e;
+  background-color: #ffffff;
+  border: 1px solid #d8e0ea;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
+}
+
+.acao-lancamento:hover {
+  background-color: #f4f6f8;
+  border-color: #8292a7;
+}
+
+.acao-lancamento.acao-excluir {
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.acao-lancamento.acao-excluir:hover {
+  background-color: #fef2f2;
+  border-color: #f0a4a4;
+}
+
+.historico-sucesso {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  color: #166534;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+/* ---------- Janela modal ---------- */
+
+.dialogo {
+  width: min(560px, calc(100% - 24px));
+  max-height: calc(100dvh - 24px);
+  padding: 0;
+  color: #071224;
+  background-color: #ffffff;
+  border: 1px solid #dce3eb;
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgb(7 22 46 / 25%);
+}
+
+.dialogo::backdrop {
+  background-color: rgb(17 27 46 / 55%);
+}
+
+.dialogo[open] {
+  animation: dialogo-entrar 0.22s ease both;
+}
+
+.dialogo-corpo {
+  padding: 28px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dialogo-corpo form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dialogo-titulo {
+  margin: 0;
+  color: #07162e;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.dialogo-texto {
+  margin: 0;
+  color: #5f6b7d;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.dialogo-resumo {
+  margin: 0;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #f7f9fc;
+  border: 1px solid #e5eaf1;
+  border-radius: 12px;
+}
+
+.dialogo-resumo div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.dialogo-resumo dt {
+  color: #5f6b7d;
+}
+
+.dialogo-resumo dd {
+  min-width: 0;
+  margin: 0;
+  font-weight: 600;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.dialogo-acoes {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dialogo-cancelar,
+.dialogo-confirmar,
+.dialogo-perigo {
+  min-height: 46px;
+  padding: 10px 20px;
+  border-radius: 11px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dialogo-cancelar {
+  color: #111b2e;
+  background-color: #ffffff;
+  border: 1px solid #d8e0ea;
+}
+
+.dialogo-confirmar {
+  color: #ffffff;
+  background-color: #111c2f;
+  border: 1px solid #111c2f;
+}
+
+.dialogo-perigo {
+  color: #ffffff;
+  background-color: #b42318;
+  border: 1px solid #b42318;
+}
+
+.dialogo-confirmar:disabled,
+.dialogo-perigo:disabled,
+.dialogo-cancelar:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.dialogo button:focus-visible,
+.dialogo input:focus-visible,
+.dialogo textarea:focus-visible {
+  outline: 3px solid #70849e;
+  outline-offset: 3px;
+}
+
+@keyframes dialogo-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialogo[open] {
+    animation: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .dialogo-corpo {
+    padding: 22px 18px;
+  }
+
+  .dialogo-acoes {
+    flex-direction: column-reverse;
+  }
+
+  .dialogo-acoes button {
+    width: 100%;
+  }
+}
